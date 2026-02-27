@@ -1,11 +1,9 @@
 package com.pvp.travelmatch.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,4 +31,7 @@ public class User {
     private String city;
 
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<TravelPlan> travelPlans;
 }
