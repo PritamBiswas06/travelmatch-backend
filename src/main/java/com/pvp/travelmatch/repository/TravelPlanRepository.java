@@ -1,6 +1,7 @@
 package com.pvp.travelmatch.repository;
 
 import com.pvp.travelmatch.entity.TravelPlan;
+import com.pvp.travelmatch.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -9,6 +10,10 @@ import java.util.List;
 
 public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
 
+    // For Dashboard
+    List<TravelPlan> findByUser(User user);
+
+    // For Matching
     @Query("""
         SELECT t FROM TravelPlan t
         WHERE t.destination = :destination
@@ -22,4 +27,6 @@ public interface TravelPlanRepository extends JpaRepository<TravelPlan, Long> {
             LocalDate endDate,
             Long userId
     );
+
+    List<TravelPlan> findByUserIdNot(Long userId);
 }

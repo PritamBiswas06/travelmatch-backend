@@ -19,10 +19,10 @@ public class TravelPlanService {
 
     private final TravelPlanRepository travelPlanRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public TravelPlan createPlan(TravelPlanRequest request) {
 
-        // 🔥 Get logged-in user email from JWT
         String email = (String) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
 
@@ -40,7 +40,77 @@ public class TravelPlanService {
                 .user(user)
                 .build();
 
-        return travelPlanRepository.save(plan);
+        TravelPlan savedPlan = travelPlanRepository.save(plan);
+
+        String dashboardLink = "http://localhost:4200/dashboard";
+
+        String htmlEmail = """
+<html>
+<body style="font-family:Arial;background:#f4f6fb;padding:30px;">
+
+<div style="max-width:600px;margin:auto;background:white;border-radius:12px;
+box-shadow:0 10px 40px rgba(0,0,0,0.1);overflow:hidden;">
+
+<div style="background:#0d78e3;color:white;padding:20px;text-align:center;font-size:22px;">
+✈ TravelMatch
+</div>
+
+<div style="padding:30px;text-align:center;">
+
+<h2>Your Trip is Live 🌍</h2>
+
+<p>Hello <b>%s</b>,</p>
+
+<p>Your travel plan has been successfully created!</p>
+
+<div style="margin:25px 0;padding:20px;background:#f7f9ff;border-radius:8px;text-align:left;">
+
+<p><b>From:</b> %s</p>
+<p><b>Destination:</b> %s</p>
+<p><b>Start Date:</b> %s</p>
+<p><b>End Date:</b> %s</p>
+<p><b>Budget:</b> ₹ %s</p>
+<p><b>Travel Style:</b> %s</p>
+
+</div>
+
+<p>We are now showing your trip to compatible travelers.</p>
+
+<a href="%s"
+style="display:inline-block;margin-top:20px;padding:14px 28px;
+background:#ff5a3d;color:white;text-decoration:none;
+border-radius:6px;font-weight:bold;">
+View Dashboard
+</a>
+
+<p style="margin-top:30px;font-size:13px;color:#888;">
+Keep an eye on your inbox for match requests 👀
+</p>
+
+</div>
+
+</div>
+
+</body>
+</html>
+""".formatted(
+                user.getName(),
+                plan.getFromLocation(),
+                plan.getDestination(),
+                plan.getStartDate(),
+                plan.getEndDate(),
+                plan.getBudget(),
+                plan.getTravelType(),
+                dashboardLink
+        );
+
+        emailService.sendHtmlEmail(
+                user.getEmail(),
+                "Trip Confirmed: " + plan.getDestination() + " ✈",
+                htmlEmail
+        );
+
+        return savedPlan;
     }
 
 //    public List<TravelPlan> findMatches(Long planId) {
@@ -123,5 +193,16 @@ public class TravelPlanService {
                 })
                 .sorted((a, b) -> Integer.compare(b.getScore(), a.getScore()))
                 .toList();
+    }
+
+
+    public List<TravelPlan> getMyPlans() {
+        String email = (String) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return travelPlanRepository.findByUser(user);
     }
 }

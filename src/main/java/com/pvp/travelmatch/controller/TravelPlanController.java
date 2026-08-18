@@ -21,13 +21,13 @@ public class TravelPlanController {
         return travelPlanService.createPlan(request);
     }
 
-//    @GetMapping("/{planId}/matches")
-//    public List<TravelPlan> getMatches(@PathVariable Long planId) {
-//        return travelPlanService.findMatches(planId);
-//    }
-
     @GetMapping("/{planId}/matches")
     public List<MatchResponse> getMatches(@PathVariable Long planId) {
         return travelPlanService.findMatches(planId);
+    }
+
+    @GetMapping("/my")
+    public List<TravelPlan> getMyPlans() {
+        return travelPlanService.getMyPlans();
     }
 }

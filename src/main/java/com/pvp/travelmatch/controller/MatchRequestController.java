@@ -37,4 +37,10 @@ public class MatchRequestController {
     public List<MatchRequest> myRequests() {
         return matchRequestService.getMyRequests();
     }
+
+    @GetMapping("/api/match/{planId}")
+    public List<?> getMatches(@PathVariable Long planId) {
+        return matchRequestService.findMatches(planId);
+    }
+
 }
